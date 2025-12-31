@@ -2,10 +2,10 @@
 
 namespace SystemCommandLine.Extensions;
 
-public interface ICommandArgumentBuilderWithMapping<TCommand, TOptionHolder, TOption>
+public interface ICommandOptionBuilderWithMapping<TCommand, TOptionHolder, TOption>
     where TCommand : Command, IUseCommandBuilder<TCommand>
     where TOptionHolder : class
 {
     ICommandBuilderWithMapping<TCommand, TOptionHolder> AddToCommand();
-    ICommandArgumentBuilderWithMapping<TCommand, TOptionHolder, TOption> Configure(Action<Argument<TOption>> value);
+    ICommandOptionBuilderWithMapping<TCommand, TOptionHolder, TOption> Configure(Action<Option<TOption>> value);
 }

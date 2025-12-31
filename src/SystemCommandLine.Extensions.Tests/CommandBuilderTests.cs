@@ -10,7 +10,7 @@ public class CommandBuilderTests
 {
     private class TestRootCommand : RootCommand, IUseCommandBuilder<TestRootCommand>
     {
-        public static TestRootCommand CommandFactory(IServiceProvider serviceProvider, ArgumentMapperRegistration mapperRegistration)
+        public static TestRootCommand CommandFactory(IServiceProvider serviceProvider, SymbolMapperRegistration mapperRegistration)
         {
             return new TestRootCommand() {
                 serviceProvider.GetRequiredService<TestCommand>()
@@ -20,7 +20,7 @@ public class CommandBuilderTests
 
     private class TestCommand : Command, IUseCommandBuilder<TestCommand>
     {
-        public TestCommand(ArgumentMapperRegistration mapperRegistration) : base("test", "A test command")
+        public TestCommand(SymbolMapperRegistration mapperRegistration) : base("test", "A test command")
         {
             this.UseCommandBuilder().WithMapping<TestCommandOptions>(mapperRegistration)
                 .NewOption(x => x.Name).Configure(o =>
@@ -32,6 +32,10 @@ public class CommandBuilderTests
                 {
                     o.Description = "Name with property default";
                 }).AddToCommand()
+                .NewArgument(x => x.NameArgument).Configure(o =>
+                {
+                    o.Description = "Name argument";
+                }).AddToCommand()
                 .NewOption(x => x.Count).Configure(o =>
                 {
                     o.Description = "Count for the test";
@@ -41,14 +45,20 @@ public class CommandBuilderTests
                 {
                     o.Description = "An option that is not mapped to the options class";
                     o.DefaultValueFactory = _ => "!";
+                }).AddToCommand()
+                .NewArgument<string>("NotMappedArgument").Configure(o =>
+                {
+                    o.Description = "An argument that is not mapped to the options class";
+                    o.DefaultValueFactory = _ => "!";
                 }).AddToCommand();
         }
-        public static TestCommand CommandFactory(IServiceProvider serviceProvider, ArgumentMapperRegistration mapperRegistration) => new(mapperRegistration);
+        public static TestCommand CommandFactory(IServiceProvider serviceProvider, SymbolMapperRegistration mapperRegistration) => new(mapperRegistration);
 
         public class TestCommandOptions
         {
             public required string Name { get; set; }
             public string NameWithDefault { get; set; } = "PropertyDefault";
+            public required string NameArgument { get; set; }
             public int Count { get; set; }
         }
         public class TestHandler(IOptions<TestCommandOptions> options) : SynchronousCommandLineAction
@@ -70,9 +80,10 @@ public class CommandBuilderTests
         private static int Handler(string handlerType, ParseResult parseResult, IOptions<TestCommandOptions> options)
         {
             string notMappedOption = parseResult.GetRequiredValue<string>(NameFormatExtensions.ToKebabCase("--", nameof(notMappedOption)));
+            string notMappedArgument = parseResult.GetRequiredValue<string>(NameFormatExtensions.ToKebabCase(nameof(notMappedArgument)));
 
             parseResult.InvocationConfiguration
-                .Output.WriteLine($"Running {handlerType} test '{options.Value.Name}' '{options.Value.NameWithDefault}' {options.Value.Count} times {notMappedOption}");
+                .Output.WriteLine($"Running {handlerType} test '{options.Value.Name}' '{options.Value.NameWithDefault}' '{options.Value.NameArgument}' {options.Value.Count} times {notMappedOption} {notMappedArgument}");
 
             parseResult.InvocationConfiguration
                 .Error.WriteLine($"Error message");
@@ -102,7 +113,7 @@ public class CommandBuilderTests
     [Fact]
     public void Should_run_synchronous_handler()
     {
-        using var serviceProvider = GetServiceProviderWithHandler("test --name MyTest --count 5 --not-mapped-option !!!");
+        using var serviceProvider = GetServiceProviderWithHandler("test --name MyTest --count 5 --not-mapped-option !!! foo bar");
         ParseResult parserResult = serviceProvider.GetRequiredService<ParseResult>();
 
         InvocationConfiguration configuration = new()
@@ -113,13 +124,13 @@ public class CommandBuilderTests
         int result = parserResult.Invoke(configuration);
         Assert.Matches(@"Error message", configuration.Error.ToString());
         Assert.Equal(42, result);
-        Assert.Matches(@"Running sync test 'MyTest' 'PropertyDefault' 5 times !!!", configuration.Output.ToString());
+        Assert.Matches(@"Running sync test 'MyTest' 'PropertyDefault' 'foo' 5 times !!! bar", configuration.Output.ToString());
     }
 
     [Fact]
     public async Task Should_run_asynchronous_handler()
     {
-        using ServiceProvider serviceProvider = GetServiceProviderWithAsyncHandler("test --name MyTest --count 5 --not-mapped-option !!!");
+        using ServiceProvider serviceProvider = GetServiceProviderWithAsyncHandler("test --name MyTest --count 5 --not-mapped-option !!! foo bar");
 
         ParseResult parserResult = serviceProvider.GetRequiredService<ParseResult>();
 
@@ -132,13 +143,13 @@ public class CommandBuilderTests
 
         Assert.Matches(@"Error message", configuration.Error.ToString());
         Assert.Equal(42, result);
-        Assert.Matches(@"Running async test 'MyTest' 'PropertyDefault' 5 times !!!", configuration.Output.ToString());
+        Assert.Matches(@"Running async test 'MyTest' 'PropertyDefault' 'foo' 5 times !!! bar", configuration.Output.ToString());
     }
 
     [Fact]
     public void Should_allow_option_and_property_default_values()
     {
-        using ServiceProvider serviceProvider = GetServiceProviderWithHandler("test");
+        using ServiceProvider serviceProvider = GetServiceProviderWithHandler("test foo");
 
         ParseResult parserResult = serviceProvider.GetRequiredService<ParseResult>();
 
@@ -150,6 +161,6 @@ public class CommandBuilderTests
         int result = parserResult.Invoke(configuration);
 
         Assert.Equal(42, result);
-        Assert.Matches(@"Running sync test 'OptionDefault' 'PropertyDefault' 1 times !", configuration.Output.ToString());
+        Assert.Matches(@"Running sync test 'OptionDefault' 'PropertyDefault' 'foo' 1 times ! !", configuration.Output.ToString());
     }
 }

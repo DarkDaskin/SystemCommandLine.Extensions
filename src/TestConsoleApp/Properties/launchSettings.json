@@ -2,7 +2,7 @@
   "profiles": {
     "TestConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "greet --name John --shout --times 5 --log-event-level Debug"
+      "commandLineArgs": "greet John --shout --times 5 --log-event-level Debug"
     }
   }
 }

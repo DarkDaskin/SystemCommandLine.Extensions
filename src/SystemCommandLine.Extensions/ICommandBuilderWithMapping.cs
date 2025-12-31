@@ -8,5 +8,6 @@ public interface ICommandBuilderWithMapping<TCommand, TOptionHolder>
     where TOptionHolder : class
 {
     ICommandBuilder<TCommand> CommandBuilder();
-    ICommandArgumentBuilderWithMapping<TCommand, TOptionHolder, TOption> NewOption<TOption>(Expression<Func<TOptionHolder, TOption>> propertyExpression);
+    ICommandArgumentBuilderWithMapping<TCommand, TOptionHolder, TOption> NewArgument<TOption>(Expression<Func<TOptionHolder, TOption>> propertyExpression);
+    ICommandOptionBuilderWithMapping<TCommand, TOptionHolder, TOption> NewOption<TOption>(Expression<Func<TOptionHolder, TOption>> propertyExpression);
 }

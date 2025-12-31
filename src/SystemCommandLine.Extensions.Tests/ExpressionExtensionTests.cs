@@ -25,7 +25,7 @@ public class ExpressionExtensionTests
     public void CreateArgumentMapper_sets_reference_type_property_value()
     {
         // Arrange
-        Action<Holder, string?> mapper = ExpressionExtensions.CreateArgumentValueMapper<Holder, string?>(h => h.Name);
+        Action<Holder, string?> mapper = ExpressionExtensions.CreateSymbolValueMapper<Holder, string?>(h => h.Name);
         Holder holder = new();
 
         // Act
@@ -39,7 +39,7 @@ public class ExpressionExtensionTests
     public void CreateArgumentMapper_does_not_set_null_value()
     {
         // Arrange
-        Action<Holder, string?> mapper = ExpressionExtensions.CreateArgumentValueMapper<Holder, string?>(h => h.Name);
+        Action<Holder, string?> mapper = ExpressionExtensions.CreateSymbolValueMapper<Holder, string?>(h => h.Name);
         Holder holder = new();
 
         // Act
@@ -53,7 +53,7 @@ public class ExpressionExtensionTests
     public void CreateArgumentMapper_sets_value_type_property_value()
     {
         // Arrange
-        Action<Holder, int> mapper = ExpressionExtensions.CreateArgumentValueMapper<Holder, int>(h => h.Number);
+        Action<Holder, int> mapper = ExpressionExtensions.CreateSymbolValueMapper<Holder, int>(h => h.Number);
         Holder holder = new();
 
         // Act
@@ -68,7 +68,7 @@ public class ExpressionExtensionTests
     {
         // Act
         ArgumentException ex = Assert.Throws<ArgumentException>(() =>
-            ExpressionExtensions.CreateArgumentValueMapper<Holder, string>(h => h.WithPrivateSetter));
+            ExpressionExtensions.CreateSymbolValueMapper<Holder, string>(h => h.WithPrivateSetter));
 
         // Assert
         Assert.Equal("Property Holder.WithPrivateSetter has no accessible setter.", ex.Message);
@@ -79,7 +79,7 @@ public class ExpressionExtensionTests
     {
         // Act
         ArgumentException ex = Assert.Throws<ArgumentException>(() =>
-            ExpressionExtensions.CreateArgumentValueMapper<Holder, string>(h => h.ReadOnly));
+            ExpressionExtensions.CreateSymbolValueMapper<Holder, string>(h => h.ReadOnly));
 
         // Assert
         Assert.Equal("Property Holder.ReadOnly has no accessible setter.", ex.Message);

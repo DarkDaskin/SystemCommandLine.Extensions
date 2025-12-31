@@ -6,12 +6,14 @@ namespace SystemCommandLine.Extensions;
 
 public static class ExpressionExtensions
 {
-    public static string GetPropertyName<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TOptionHolder, TOption>(this Expression<Func<TOptionHolder, TOption>> propertyExpression)
+    public static string GetPropertyName<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TOptionHolder, TOption>(
+        this Expression<Func<TOptionHolder, TOption>> propertyExpression)
     {
         return propertyExpression.ExtractProperty().Name;
     }
 
-    public static Action<TOptionHolder, TOption?> CreateArgumentValueMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TOptionHolder, TOption>(this Expression<Func<TOptionHolder, TOption>> propertyExpression) where TOptionHolder : class
+    public static Action<TOptionHolder, TOption?> CreateSymbolValueMapper<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TOptionHolder, TOption>(
+        this Expression<Func<TOptionHolder, TOption>> propertyExpression) where TOptionHolder : class
     {
         PropertyInfo propertyInfo = propertyExpression.ExtractProperty();
 
@@ -44,8 +46,5 @@ public static class ExpressionExtensions
         throw new ArgumentException("Expression must be a property access like t => t.Property.");
     }
 
-    private static bool IsWritable([NotNullWhen(true)] this MethodInfo? setMethod)
-    {
-        return setMethod is { } && setMethod.IsPublic;
-    }
+    private static bool IsWritable([NotNullWhen(true)] this MethodInfo? setMethod) => setMethod is { IsPublic: true };
 }

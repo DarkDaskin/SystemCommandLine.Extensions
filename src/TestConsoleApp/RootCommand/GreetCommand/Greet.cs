@@ -10,7 +10,7 @@ namespace TestConsoleApp.RootCommand.GreetCommand;
 
 public class Greet : Command, IUseCommandBuilder<Greet>
 {
-    public Greet(ArgumentMapperRegistration mapperRegistration) : base(nameof(Greet).ToLower(), "Greets a person")
+    public Greet(SymbolMapperRegistration mapperRegistration) : base(nameof(Greet).ToLower(), "Greets a person")
     {
         this.UseCommandBuilder()
             .NewOption<string>("prefix").Configure(o =>
@@ -29,9 +29,8 @@ public class Greet : Command, IUseCommandBuilder<Greet>
                 o.Description = "An example option without DI mapping";
             }).AddToCommand()
             .WithMapping<GreetOptions>(mapperRegistration)
-            .NewOption(x => x.Name).Configure(o =>
+            .NewArgument(x => x.Name).Configure(o =>
             {
-                o.Required = true;
                 o.Description = "Name of the person to greet";
             }).AddToCommand()
             .NewOption(x => x.Times).Configure(o =>
@@ -44,7 +43,7 @@ public class Greet : Command, IUseCommandBuilder<Greet>
             }).AddToCommand();
     }
 
-    public static Greet CommandFactory(IServiceProvider sp, ArgumentMapperRegistration mapperRegistration)
+    public static Greet CommandFactory(IServiceProvider sp, SymbolMapperRegistration mapperRegistration)
     {
         return new Greet(mapperRegistration);
     }
@@ -58,7 +57,7 @@ public class Greet : Command, IUseCommandBuilder<Greet>
 
     public class GreetHandler(IOptions<GreetOptions> options, ILogger<GreetHandler> logger) : AsynchronousCommandLineAction
     {
-        public async override Task<int> InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken = default)
+        public override async Task<int> InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken = default)
         {
             await Task.CompletedTask;
             logger.LogDebug("greet");

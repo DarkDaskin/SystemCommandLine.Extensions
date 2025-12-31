@@ -15,9 +15,9 @@ public static class ServiceCollectionExtensions
         where TCommand : Command, IUseCommandBuilder<TCommand>
         where TOptions : class
     {
-        return optionsBuilder.Configure<TCommand, IOptions<CommandArgumentMapper<TCommand>>, ParseResult>((options, command, commandArgumentMappers, parseResult) =>
+        return optionsBuilder.Configure<TCommand, IOptions<CommandSymbolMapper<TCommand>>, ParseResult>((options, command, commandArgumentMappers, parseResult) =>
         {
-            foreach (ArgumentMapper argumentMapper in commandArgumentMappers.Value)
+            foreach (SymbolMapper argumentMapper in commandArgumentMappers.Value)
             {
                 argumentMapper(parseResult, options);
             }
@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
     {
         return services
             .AddOptions<TOptions>().BindCommand<TCommand, TOptions>().Services
-            .AddOptions<CommandArgumentMapper<TCommand>>().Services;
+            .AddOptions<CommandSymbolMapper<TCommand>>().Services;
     }
 
     public static IServiceCollection AddRootCommand<TRootCommand>(this IServiceCollection services, string[] args)
@@ -78,8 +78,8 @@ public static class ServiceCollectionExtensions
         return command;
     }
 
-    private static ArgumentMapperRegistration GetArgumentMapperRegistration<TCommand>(IServiceProvider sp) where TCommand : Command, IUseCommandBuilder<TCommand>
+    private static SymbolMapperRegistration GetArgumentMapperRegistration<TCommand>(IServiceProvider sp) where TCommand : Command, IUseCommandBuilder<TCommand>
     {
-        return sp.GetRequiredService<IOptions<CommandArgumentMapper<TCommand>>>().Value.Add;
+        return sp.GetRequiredService<IOptions<CommandSymbolMapper<TCommand>>>().Value.Add;
     }
 }

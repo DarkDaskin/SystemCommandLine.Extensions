@@ -12,7 +12,7 @@ namespace TestConsoleApp.RootCommand;
 
 internal class Root : System.CommandLine.RootCommand, IUseCommandBuilder<Root>
 {
-    public Root(ArgumentMapperRegistration mapperRegistration) : base("Sample ConsoleApp with DI and Serilog")
+    public Root(SymbolMapperRegistration mapperRegistration) : base("Sample ConsoleApp with DI and Serilog")
     {
         this.UseCommandBuilder().WithMapping<LoggerOptions>(mapperRegistration)
             .NewOption(o => o.LogEventLevel).Configure(o =>
@@ -22,7 +22,7 @@ internal class Root : System.CommandLine.RootCommand, IUseCommandBuilder<Root>
             }).AddToCommand();
     }
 
-    public static Root CommandFactory(IServiceProvider sp, ArgumentMapperRegistration mapperRegistration)
+    public static Root CommandFactory(IServiceProvider sp, SymbolMapperRegistration mapperRegistration)
     {
         return new Root(mapperRegistration)
         {

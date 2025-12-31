@@ -6,5 +6,5 @@ namespace System.CommandLine;
 
 public interface IUseCommandBuilder<TCommand> where TCommand : Command
 {
-    static abstract TCommand CommandFactory(IServiceProvider serviceProvider, ArgumentMapperRegistration mapperRegistration);
+    static abstract TCommand CommandFactory(IServiceProvider serviceProvider, SymbolMapperRegistration mapperRegistration);
 }

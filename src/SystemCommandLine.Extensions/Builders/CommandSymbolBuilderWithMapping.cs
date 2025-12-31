@@ -11,7 +11,8 @@ internal abstract class CommandSymbolBuilderWithMapping<TOptionHolder, TOption>(
 
         void symbolMapper(ParseResult parsedResult, object options)
         {
-            symbolValueMapper((TOptionHolder)options, parsedResult.GetValue<TOption>(symbol.Name));
+            if (options is TOptionHolder typedOptions)
+                symbolValueMapper(typedOptions, parsedResult.GetValue<TOption>(symbol.Name));
         }
 
         mapperRegistration(symbolMapper);
